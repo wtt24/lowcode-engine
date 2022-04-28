@@ -27,6 +27,14 @@ jobs:
       - name: lint
         run: npm run lint
 
+  filename-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: batista/lint-filenames@v1
+        with:
+          path: './packages'
+          pattern: '/^[a-z\\d-\\/\\.]+$/'
+
   test-designer:
     runs-on: ubuntu-latest
     steps:
