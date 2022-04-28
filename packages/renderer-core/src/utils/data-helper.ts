@@ -1,8 +1,10 @@
+/* eslint-disable no-console */
+/* eslint-disable max-len */
 /* eslint-disable object-curly-newline */
 import { isJSFunction } from '@alilc/lowcode-types';
 import { transformArrayToMap, transformStringToFunction, clone } from './common';
 import { jsonp, request, get, post } from './request';
-import { DataSource, DataSourceItem } from '../types';
+import { DataSource, DataSourceItem, IRendererAppHelper } from '../types';
 
 const DS_STATUS = {
   INIT: 'init',
@@ -12,21 +14,46 @@ const DS_STATUS = {
 };
 
 export class DataHelper {
+  /**
+   * host object that will be "this" object when excuting dataHandler
+   *
+   * @type {*}
+   * @memberof DataHelper
+   */
   host: any;
 
+  /**
+   * data source config
+   *
+   * @type {DataSource}
+   * @memberof DataHelper
+   */
   config: DataSource;
 
+  /**
+   * a parser function which will be called to process config data
+   * which eventually will call common/utils.processData() to process data
+   * (originalConfig) => parsedConfig
+   * @type {*}
+   * @memberof DataHelper
+   */
   parser: any;
 
+  /**
+   * config.list
+   *
+   * @type {any[]}
+   * @memberof DataHelper
+   */
   ajaxList: any[];
 
   ajaxMap: any;
 
   dataSourceMap: any;
 
-  appHelper: any;
+  appHelper: IRendererAppHelper;
 
-  constructor(comp: any, config: DataSource, appHelper: any, parser: any) {
+  constructor(comp: any, config: DataSource, appHelper: IRendererAppHelper, parser: any) {
     this.host = comp;
     this.config = config || {};
     this.parser = parser;
@@ -37,13 +64,13 @@ export class DataHelper {
   }
 
   // 重置config，dataSourceMap状态会被重置；
-  resetConfig(config = {}) {
-    this.config = config as DataSource;
-    this.ajaxList = (config as DataSource)?.list || [];
-    this.ajaxMap = transformArrayToMap(this.ajaxList, 'id');
-    this.dataSourceMap = this.generateDataSourceMap();
-    return this.dataSourceMap;
-  }
+  // resetConfig(config = {}) {
+  //   this.config = config as DataSource;
+  //   this.ajaxList = (config as DataSource)?.list || [];
+  //   this.ajaxMap = transformArrayToMap(this.ajaxList, 'id');
+  //   this.dataSourceMap = this.generateDataSourceMap();
+  //   return this.dataSourceMap;
+  // }
 
   // 更新config，只会更新配置，状态保存；
   updateConfig(config = {}) {
@@ -92,14 +119,32 @@ export class DataHelper {
     this.dataSourceMap[id].status = error ? DS_STATUS.ERROR : DS_STATUS.LOADED;
   }
 
-  getInitData() {
-    const initSyncData = this.parser(this.ajaxList).filter((item: DataSourceItem) => {
-      if (item.isInit) {
+  /**
+   * get all dataSourceItems which marked as isInit === true
+   * @private
+   * @returns
+   * @memberof DataHelper
+   */
+  getInitDataSourseConfigs() {
+    const initConfigs = this.parser(this.ajaxList).filter((item: DataSourceItem) => {
+      // according to [spec](https://lowcode-engine.cn/lowcode), isInit should be boolean true to be working
+      if (item.isInit === true) {
         this.dataSourceMap[item.id].status = DS_STATUS.LOADING;
         return true;
       }
       return false;
     });
+    return initConfigs;
+  }
+
+  /**
+   * process all dataSourceItems which marked as isInit === true, and get dataSource request results.
+   * @public
+   * @returns
+   * @memberof DataHelper
+   */
+  getInitData() {
+    const initSyncData = this.getInitDataSourseConfigs();
     // 所有 datasource 的 datahandler
     return this.asyncDataHandler(initSyncData).then((res) => {
       let { dataHandler } = this.config;
@@ -287,7 +332,7 @@ export class DataHelper {
     try {
       return dataHandler.call(this.host, data, error);
     } catch (e) {
-      console.error(`[${ id }]单个请求数据处理函数运行出错`, e);
+      console.error(`[${id}]单个请求数据处理函数运行出错`, e);
     }
   }
 
