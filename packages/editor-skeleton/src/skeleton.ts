@@ -307,6 +307,39 @@ export class Skeleton {
     return this.panels.get(name);
   }
 
+  getArea(areaName: string): Area<any, any> | undefined {
+    switch (areaName) {
+      case 'leftArea':
+      case 'left':
+        return this.leftArea;
+      case 'rightArea':
+      case 'right':
+        return this.rightArea;
+      case 'topArea':
+      case 'top':
+        return this.topArea;
+      case 'toolbar':
+        return this.toolbar;
+      case 'mainArea':
+      case 'main':
+      case 'center':
+      case 'centerArea':
+        return this.mainArea;
+      case 'bottomArea':
+      case 'bottom':
+        return this.bottomArea;
+      case 'leftFixedArea':
+        return this.leftFixedArea;
+      case 'leftFloatArea':
+        return this.leftFloatArea;
+      case 'stages':
+        return this.stages;
+      default:
+        // do nothing
+    }
+    return this.bottomArea;
+  }
+
   getStage(name: string) {
     return this.stages.container.get(name);
   }
@@ -373,34 +406,11 @@ export class Skeleton {
         area = 'leftArea';
       }
     }
-    switch (area) {
-      case 'leftArea':
-      case 'left':
-        return this.leftArea.add(parsedConfig as PanelDockConfig);
-      case 'rightArea':
-      case 'right':
-        return this.rightArea.add(parsedConfig as PanelConfig);
-      case 'topArea':
-      case 'top':
-        return this.topArea.add(parsedConfig as PanelDockConfig);
-      case 'toolbar':
-        return this.toolbar.add(parsedConfig as PanelDockConfig);
-      case 'mainArea':
-      case 'main':
-      case 'center':
-      case 'centerArea':
-        return this.mainArea.add(parsedConfig as PanelConfig);
-      case 'bottomArea':
-      case 'bottom':
-        return this.bottomArea.add(parsedConfig as PanelConfig);
-      case 'leftFixedArea':
-        return this.leftFixedArea.add(parsedConfig as PanelConfig);
-      case 'leftFloatArea':
-        return this.leftFloatArea.add(parsedConfig as PanelConfig);
-      case 'stages':
-        return this.stages.add(parsedConfig as StageConfig);
-      default:
-        // do nothing
+    const areaInstance = this.getArea(area);
+    if (!areaInstance) {
+      return;
     }
+
+    return areaInstance.add(parsedConfig as PanelDockConfig);
   }
 }

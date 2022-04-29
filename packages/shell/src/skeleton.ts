@@ -44,6 +44,22 @@ export default class Skeleton {
   }
 
   /**
+   * 显示 Area
+   * @param areaName area 名字
+   */
+  showArea(areaName: IWidgetConfigArea) {
+    this[skeletonSymbol].getArea(areaName)?.show();
+  }
+
+  /**
+   * 隐藏 Area
+   * @param areaName area 名字
+   */
+  hideArea(areaName: string) {
+    this[skeletonSymbol].getArea(areaName)?.hide();
+  }
+
+  /**
    * 隐藏面板
    * @param name
    */
