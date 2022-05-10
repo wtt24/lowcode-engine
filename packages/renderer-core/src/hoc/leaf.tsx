@@ -412,7 +412,7 @@ export function leafWrapper(Comp: types.IBaseRenderComponent, {
         const node = leaf;
 
         if (key === '___condition___') {
-          const { condition = true } = this.leaf?.export(TransformStage.Render) || {};
+          const { condition } = this.leaf?.export?.(TransformStage.Render) || { condition: newValue };
           const conditionValue = parseData(condition, scope);
           __debug(`key is ___condition___, change condition value to [${condition}]`);
           // 条件表达式改变
