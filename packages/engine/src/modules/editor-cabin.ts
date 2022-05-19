@@ -11,4 +11,5 @@ export {
   getSetter,
   getSettersMap,
   globalLocale,
+  globalContext,
 } from '@alilc/lowcode-editor-core';
